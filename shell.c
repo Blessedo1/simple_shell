@@ -14,39 +14,52 @@ int main(void)
 {
 	while (1)
 	{
-		printf("ragnarhack@DESKTOP$ \n");
+		printf("ragnarhack@DESKTOP$ ");
 		
-		char *command;
-		size_t size;
+		char *command = NULL;
+		size_t size = 0;
 
 		ssize_t read = getline(&command, &size, stdin);
 		if (read == -1)
 		{
-			printf("ERROR: NOT A COMMAND");
+			perror("ERROR: NOT A COMMAND");
+			free(command);
 			return (1);
 		}
+		command[strcspn(command, "\n")] = '\0';
 
 		char *token;
-		const char delimiter[] = " ";
+		const char delimiter[] = " \n";
 
 		token = strtok(command, delimiter);
+		if (token == NULL)
+		{
+			free(command);
+			continue;
+		}
+
 
 		pid_t val;
-		char *const* argv[1];
+		char *argv[] = {token, NULL};
 
 		val = fork();
 		if (val == -1)
 		{
+			free(command);
 			return (-1);
 		}
 		if (val == 0)
 		{
-			execve(token, argv[0], NULL);
+			execve(token, argv, NULL);
+			perror("not found");
+			free(command);
+			exit (1);
 		}
 		else
 		{
 			wait(NULL);
 		}
+		free(command);
 	}
 	return (0);
 }
